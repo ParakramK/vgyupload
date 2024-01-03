@@ -31,15 +31,23 @@ Future<String?> uploadImage(String filepath, String apiKey) async {
   var request = http.MultipartRequest('POST', Uri.parse(uploadURL));
   request.files.add(await http.MultipartFile.fromPath('file', filepath));
   request.fields['userkey'] = apiKey;
+
   try {
     var response = await request.send();
+
+    // print('Response Status Code: ${response.statusCode}');
+    // print('Response Reason Phrase: ${response.reasonPhrase}');
+
     if (response.statusCode == 200) {
       var resBody = await response.stream.bytesToString();
       var data = json.decode(resBody);
-      if (data['error'] != null) {
+      // print(data);
+
+      if (data['error'] != false) {
         print('Error: ${data['message']}');
         return null;
       }
+
       String imageUrl = data['image'];
       return imageUrl;
     } else {
@@ -47,12 +55,12 @@ Future<String?> uploadImage(String filepath, String apiKey) async {
       return null;
     }
   } catch (e) {
-    print('Error: $e');
+    print('Error uploading image: $e');
     return null;
   }
 }
 
-void main(List<String> arguments) {
+void main(List<String> arguments) async {
   if (arguments.isEmpty) {
     print("Usage: dart vgyupload API_KEY PATH [PATH ...]");
     return;
@@ -63,7 +71,11 @@ void main(List<String> arguments) {
     exit(1);
   }
   for (int i = 0; i < arguments.length; i++) {
-    // print('Argument $i: ${arguments[i]}');
-    uploadImage(arguments[i], apiKey);
+    String? imageUrl = await uploadImage(arguments[i], apiKey);
+    if (imageUrl != null) {
+      print(imageUrl);
+    } else {
+      print('Failed to upload image.');
+    }
   }
 }
