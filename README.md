@@ -1,2 +1,3 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+# vgyupload
+
+A simple cli tool to upload images to vgy.me using its api.
