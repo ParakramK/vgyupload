@@ -7,12 +7,9 @@ import 'package:http/http.dart' as http;
 const String uploadURL = 'https://vgy.me/upload';
 
 Future<String?> uploadImage(String filepath, String apiKey) async {
-  const maxFileSize = 20 * 1024 * 1024;
-  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
-  if (!File(filepath).absolute.existsSync()) {
-    print('Error: $filepath is not an absolute path');
-    return null;
-  }
+  const int maxFileSize = 20 * 1024 * 1024;
+  const List<String> allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+
   if (!File(filepath).existsSync()) {
     print('Error: $filepath is not a valid file path');
     return null;
@@ -43,7 +40,7 @@ Future<String?> uploadImage(String filepath, String apiKey) async {
       var data = json.decode(resBody);
       // print(data);
 
-      if (data['error'] != false) {
+      if (data['error'] == true) {
         print('Error: ${data['message']}');
         return null;
       }
@@ -62,15 +59,19 @@ Future<String?> uploadImage(String filepath, String apiKey) async {
 
 void main(List<String> arguments) async {
   if (arguments.isEmpty) {
-    print("Usage: dart vgyupload API_KEY PATH [PATH ...]");
+    print("Usage: vgyupload APIKEY PATH [PATH ...]");
     return;
   }
-  String? apiKey = Platform.environment['VGYAPI'];
-  if (apiKey == null) {
+  if (arguments.length < 2) {
+    print("Usage: vgyupload APIKEY PATH [PATH ...]");
+    return;
+  }
+  String? apiKey = arguments[0];
+  if (apiKey.isEmpty) {
     print('api key not found');
     exit(1);
   }
-  for (int i = 0; i < arguments.length; i++) {
+  for (int i = 1; i < arguments.length; i++) {
     String? imageUrl = await uploadImage(arguments[i], apiKey);
     if (imageUrl != null) {
       print(imageUrl);
